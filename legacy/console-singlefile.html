@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Gateway 控制台</title>
+<style>
+  :root{
+    --bg:#1D1F27; --panel:#242630; --panel2:#2B2D38; --border:#363947;
+    --text:#D7DAE0; --muted:#8A8F9C; --accent:#5B8DEF; --accent2:#7C5BFF;
+    --ok:#4CC38A; --warn:#E5A54B; --err:#E5684B; --mono:'SF Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font:14px/1.6 -apple-system,'PingFang SC','Microsoft YaHei',sans-serif;height:100vh;display:flex;flex-direction:column}
+  header{display:flex;align-items:center;gap:16px;padding:10px 18px;background:var(--panel);border-bottom:1px solid var(--border)}
+  header .logo{font-weight:700;color:var(--accent)}
+  header .spacer{flex:1}
+  header .meta{color:var(--muted);font-size:12px}
+  header button{margin-left:8px}
+  main{flex:1;display:flex;min-height:0}
+  nav{width:190px;background:var(--panel);border-right:1px solid var(--border);padding:12px 0;overflow:auto}
+  nav a{display:block;padding:9px 18px;color:var(--muted);cursor:pointer;border-left:2px solid transparent}
+  nav a.active{color:var(--text);border-left-color:var(--accent);background:var(--panel2)}
+  #content{flex:1;overflow:auto;padding:20px 24px}
+  section{display:none;max-width:980px}
+  section.active{display:block}
+  h2{font-size:16px;margin-bottom:14px;color:var(--text)}
+  h3{font-size:13px;margin:18px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field label{font-size:12px;color:var(--muted)}
+  input,select,textarea{background:var(--panel2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:7px 10px;font-size:13px;min-width:150px}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  textarea{min-width:280px;min-height:60px;font-family:var(--mono)}
+  button{background:var(--accent);border:none;border-radius:6px;color:#fff;padding:8px 14px;font-size:13px;cursor:pointer}
+  button:hover{filter:brightness(1.1)}
+  button.ghost{background:var(--panel2);border:1px solid var(--border);color:var(--text)}
+  button.danger{background:var(--err)}
+  button.warn{background:var(--warn);color:#1D1F27}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:500}
+  code,.mono{font-family:var(--mono);font-size:12px}
+  pre{background:#14151B;border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--mono);font-size:12px;overflow:auto;max-height:340px;white-space:pre-wrap;word-break:break-all}
+  .tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;background:var(--panel2);border:1px solid var(--border)}
+  .tag.ok{color:var(--ok)} .tag.err{color:var(--err)} .tag.warn{color:var(--warn)}
+  .statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+  .stat{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px}
+  .stat .v{font-size:22px;font-weight:700;color:var(--accent)}
+  .stat .l{font-size:12px;color:var(--muted)}
+  .toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:8px;background:var(--panel2);border:1px solid var(--border);display:none;z-index:9}
+  .msg{font-size:12px;color:var(--muted);margin-top:6px}
+  .key-once{background:#3A2E17;border:1px solid var(--warn);color:var(--warn);padding:8px 10px;border-radius:6px;font-family:var(--mono);margin-top:8px;word-break:break-all}
+  #login{max-width:360px;margin:12vh auto}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div id="login" class="card">
+  <h2>AI Gateway 控制台登录</h2>
+  <div class="field" style="margin-top:12px"><label>邮箱</label><input id="li-email" type="email" placeholder="you@example.com"></div>
+  <div class="field" style="margin-top:10px"><label>密码</label><input id="li-pass" type="password"></div>
+  <div style="margin-top:14px;display:flex;gap:10px">
+    <button onclick="login()">登录</button>
+    <button class="ghost" onclick="register()">注册新账号</button>
+  </div>
+  <div class="msg">登录即表示你已确认服务条款与隐私政策。注册需勾选确认，接口层强制校验。</div>
+  <pre id="login-out" style="display:none;margin-top:10px"></pre>
+</div>
+
+<div id="app" class="hidden" style="flex:1;display:flex;flex-direction:column;min-height:0">
+<header>
+  <span class="logo">AI Gateway 控制台</span>
+  <span class="meta" id="me-info"></span>
+  <span class="spacer"></span>
+  <span class="meta" id="balance-info"></span>
+  <button class="ghost warn" onclick="stepupDialog()">二次验证</button>
+  <button class="ghost" onclick="logout()">退出</button>
+</header>
+<main>
+<nav id="nav">
+  <a data-tab="stats" class="active">用量概览</a>
+  <a data-tab="keys">API Keys</a>
+  <a data-tab="providers">供应商</a>
+  <a data-tab="models">模型与定价</a>
+  <a data-tab="users">用户管理</a>
+  <a data-tab="moderation">内容审核</a>
+  <a data-tab="appeals">申诉处理</a>
+  <a data-tab="settings">合规开关</a>
+  <a data-tab="audit">审计日志</a>
+  <a data-tab="billing">账单流水</a>
+</nav>
+<div id="content">
+
+<section id="tab-stats" class="active">
+  <h2>实时用量（近 24 小时）</h2>
+  <div class="statgrid" id="stat-cards"></div>
+  <div class="card"><h3>按模型</h3><div id="stat-models"></div></div>
+  <div class="card"><h3>按状态</h3><div id="stat-status"></div></div>
+  <button class="ghost" onclick="loadStats()">刷新</button>
+  <button class="ghost" onclick="adminAction('verify_audit_chain',{},'stats-out')">校验审计哈希链</button>
+  <pre id="stats-out"></pre>
+</section>
+
+<section id="tab-keys">
+  <h2>API Key 管理</h2>
+  <div class="card">
+    <div class="row">
+      <div class="field"><label>名称</label><input id="k-name" value="default"></div>
+      <div class="field"><label>额度（货币，留空不限）</label><input id="k-quota" type="number" step="0.01"></div>
+      <div class="field"><label>IP 白名单（逗号分隔，留空不限）</label><input id="k-ip"></div>
+      <div class="field"><label>模型白名单（逗号分隔，留空不限）</label><input id="k-models" placeholder="deepseek-chat,gpt-4o"></div>
+      <label style="color:var(--muted);font-size:12px"><input type="checkbox" id="k-sign"> 强制请求签名（防重放）</label>
+      <button onclick="createKey()">创建 Key</button>
+    </div>
+    <div id="k-once"></div>
+  </div>
+  <div class="card"><div id="keys-table"></div></div>
+</section>
+
+<section id="tab-providers">
+  <h2>上游供应商</h2>
+  <div class="card">
+    <h3>登记/更新供应商（含合规授权编号）</h3>
+    <div class="row">
+      <div class="field"><label>ID（更新时填已有 ID）</label><input id="pv-id" placeholder="留空=新建"></div>
+      <div class="field"><label>名称</label><input id="pv-name"></div>
+      <div class="field"><label>Slug</label><select id="pv-slug"><option>openai</option><option>anthropic</option><option>google</option><option>deepseek</option></select></div>
+      <div class="field"><label>Base URL</label><input id="pv-url" style="min-width:280px"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div class="field"><label>授权协议编号（必填）</label><input id="pv-authref"></div>
+      <div class="field"><label>授权到期（unix 秒，可选）</label><input id="pv-authexp" type="number"></div>
+      <button onclick="upsertProvider()">保存供应商</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>录入上游密钥（AES-256-GCM 加密入库，明文不落库）</h3>
+    <div class="row">
+      <div class="field"><label>供应商 ID</label><input id="pk-pid" placeholder="p_deepseek"></div>
+      <div class="field"><label>密钥</label><input id="pk-key" type="password" style="min-width:280px"></div>
+      <div class="field"><label>标签</label><input id="pk-label" value="prod"></div>
+      <button class="danger" onclick="upsertProviderKey()">加密保存密钥</button>
+    </div>
+  </div>
+  <div class="card"><div id="providers-table"></div></div>
+</section>
+
+<section id="tab-models">
+  <h2>模型映射与定价</h2>
+  <div class="card">
+    <h3>模型映射（对外统一名 → 上游真实模型）</h3>
+    <div class="row">
+      <div class="field"><label>对外模型名</label><input id="m-public" placeholder="gpt-4o"></div>
+      <div class="field"><label>供应商 ID</label><input id="m-provider" placeholder="p_openai"></div>
+      <div class="field"><label>上游真实模型</label><input id="m-upstream" placeholder="gpt-4o"></div>
+      <div class="field"><label>优先级（小=优先）</label><input id="m-priority" type="number" value="10"></div>
+      <div class="field"><label>成本权重</label><input id="m-cost" type="number" step="0.1" value="1"></div>
+      <button onclick="upsertModel()">保存映射</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>定价（货币 / 1M tokens，输入/输出分开）</h3>
+    <div class="row">
+      <div class="field"><label>对外模型名</label><input id="pr-public"></div>
+      <div class="field"><label>输入价</label><input id="pr-in" type="number" step="0.01"></div>
+      <div class="field"><label>输出价</label><input id="pr-out" type="number" step="0.01"></div>
+      <div class="field"><label>币种</label><input id="pr-cur" value="CNY"></div>
+      <button onclick="setPricing()">保存定价</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>充值 / 调整余额</h3>
+    <div class="row">
+      <div class="field"><label>Scope（user:&lt;id&gt; 或 org:&lt;id&gt;）</label><input id="tp-scope" placeholder="user:439a7026-..."></div>
+      <div class="field"><label>金额（正充负减）</label><input id="tp-amount" type="number" step="0.01"></div>
+      <div class="field"><label>备注</label><input id="tp-memo"></div>
+      <button onclick="topup()">执行</button>
+    </div>
+  </div>
+</section>
+
+<section id="tab-users">
+  <h2>用户管理</h2>
+  <div class="card"><div id="users-table"></div></div>
+  <div class="card">
+    <div class="row">
+      <div class="field"><label>用户 ID</label><input id="u-id" style="min-width:280px"></div>
+      <button class="ghost" onclick="setRole()">设为 admin</button>
+      <button class="danger" onclick="banUser()">封禁</button>
+      <button onclick="unbanUser()">解封</button>
+    </div>
+    <div class="msg">封禁会同时撤销其全部 API Key 并强制下线。</div>
+  </div>
+</section>
+
+<section id="tab-moderation">
+  <h2>内容审核复核队列</h2>
+  <div class="card"><div id="flags-table"></div></div>
+  <div class="card">
+    <div class="row">
+      <div class="field"><label>Flag ID</label><input id="f-id" style="min-width:280px"></div>
+      <div class="field"><label>处理决定</label><select id="f-decision"><option>cleared</option><option>confirmed</option><option>dismissed</option></select></div>
+      <div class="field"><label>备注</label><input id="f-note"></div>
+      <button onclick="resolveFlag()">提交</button>
+    </div>
+  </div>
+</section>
+
+<section id="tab-appeals">
+  <h2>申诉处理</h2>
+  <div class="card"><div id="appeals-table"></div></div>
+  <div class="card">
+    <div class="row">
+      <div class="field"><label>Appeal ID</label><input id="a-id" style="min-width:280px"></div>
+      <div class="field"><label>决定</label><select id="a-decision"><option>accepted</option><option>rejected</option></select></div>
+      <div class="field"><label>说明</label><input id="a-note"></div>
+      <button onclick="resolveAppeal()">提交</button>
+    </div>
+  </div>
+</section>
+
+<section id="tab-settings">
+  <h2>平台合规开关</h2>
+  <div class="card">
+    <div id="settings-form"></div>
+    <button onclick="saveSettings()">保存设置</button>
+    <div class="msg">修改会写入审计日志。开启内容审核后，命中请求将被拦截并进入复核队列。</div>
+  </div>
+</section>
+
+<section id="tab-audit">
+  <h2>审计日志（哈希链防篡改，保留 ≥180 天）</h2>
+  <div class="card">
+    <button class="ghost" onclick="loadAudit()">加载最近 200 条</button>
+    <button class="ghost" onclick="adminAction('verify_audit_chain',{},'audit-out')">校验链完整性</button>
+    <div id="audit-table" style="margin-top:12px"></div>
+  </div>
+  <pre id="audit-out"></pre>
+</section>
+
+<section id="tab-billing">
+  <h2>账单流水</h2>
+  <div class="card">
+    <div class="row">
+      <div class="field"><label>条数</label><input id="bl-limit" type="number" value="50"></div>
+      <button class="ghost" onclick="loadLedger()">查询</button>
+      <a id="bl-csv" href="/api/billing/ledger?format=csv" target="_blank"><button class="ghost">导出 CSV</button></a>
+    </div>
+    <div id="ledger-table" style="margin-top:12px"></div>
+  </div>
+</section>
+
+</div>
+</main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function api(path, method='GET', body) {
+  const opt = { method, headers: {}, credentials: 'same-origin' };
+  if (body !== undefined) { opt.headers['content-type'] = 'application/json'; opt.body = JSON.stringify(body); }
+  const r = await fetch(path, opt);
+  let data = null;
+  try { data = await r.json(); } catch { data = { raw: 'non-json response' }; }
+  if (!r.ok) {
+    const err = (data && data.error) || {};
+    if (err.code === 'step_up_required') { stepupDialog(); }
+    throw new Error(`${r.status} ${err.code || ''} ${err.message || ''}`);
+  }
+  return data;
+}
+function toast(msg, ok=true) {
+  const t = $('toast'); t.textContent = msg;
+  t.style.borderColor = ok ? 'var(--ok)' : 'var(--err)';
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3500);
+}
+function fmtTime(ts) { return ts ? new Date(ts * 1000).toLocaleString('zh-CN') : '-'; }
+
+/* ---------- 登录 ---------- */
+async function login() {
+  try {
+    const email = $('li-email').value.trim(), password = $('li-pass').value;
+    await api('/api/auth/login', 'POST', { email, password });
+    await enterApp();
+  } catch (e) { showLoginOut(String(e)); }
+}
+async function register() {
+  try {
+    const email = $('li-email').value.trim(), password = $('li-pass').value;
+    const r = await api('/api/auth/register', 'POST', { email, password, tosAccepted: true, privacyAccepted: true });
+    showLoginOut('注册成功：' + JSON.stringify(r, null, 2));
+  } catch (e) { showLoginOut(String(e)); }
+}
+function showLoginOut(s) { const o = $('login-out'); o.textContent = s; o.style.display = 'block'; }
+async function logout() { try { await api('/api/auth/logout', 'POST', {}); } catch {} location.reload(); }
+
+async function enterApp() {
+  $('login').classList.add('hidden'); $('app').classList.remove('hidden');
+  const me = await api('/api/auth/me');
+  $('me-info').textContent = `${me.user.email} · ${me.user.role}`;
+  $('balance-info').textContent = `余额 ${me.balance.available.toFixed(4)} ${me.balance.currency}（冻结 ${me.balance.frozen.toFixed(4)}）`;
+  loadStats();
+}
+
+/* ---------- 二次验证 ---------- */
+function stepupDialog() {
+  const pass = prompt('管理操作需要二次验证，请重新输入密码：');
+  if (!pass) return;
+  api('/api/auth/stepup', 'POST', { password: pass })
+    .then(() => toast('二次验证通过，10 分钟内有效'))
+    .catch(e => toast('二次验证失败：' + e.message, false));
+}
+
+/* ---------- Tab 切换 ---------- */
+document.querySelectorAll('#nav a').forEach(a => a.onclick = () => {
+  document.querySelectorAll('#nav a').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('section').forEach(x => x.classList.remove('active'));
+  a.classList.add('active');
+  $('tab-' + a.dataset.tab).classList.add('active');
+  ({ stats: loadStats, keys: loadKeys, providers: loadProviders, users: loadUsers,
+     moderation: loadFlags, appeals: loadAppeals, settings: loadSettings,
+     audit: loadAudit, billing: loadLedger }[a.dataset.tab] || (() => {}))();
+});
+
+/* ---------- 用量概览 ---------- */
+async function loadStats() {
+  try {
+    const s = await api('/api/admin/stats');
+    const errN = Math.round(s.errorRate * 10000) / 100;
+    $('stat-cards').innerHTML = [
+      ['请求数', s.requests], ['错误率', errN + '%'], ['输入 tokens', s.promptTokens],
+      ['输出 tokens', s.completionTokens], ['费用', s.cost.toFixed(4) + ' ' + s.currency], ['待复核内容', s.pendingContentFlags]
+    ].map(([l, v]) => `<div class="stat"><div class="v">${esc(v)}</div><div class="l">${l}</div></div>`).join('');
+    $('stat-models').innerHTML = table(['模型', '请求数', '费用'], s.byModel.map(r => [esc(r.public_model), r.n, (r.cost ?? 0).toFixed(4)]));
+    $('stat-status').innerHTML = table(['状态', '数量'], s.byStatus.map(r => [statusTag(r.status), r.n]));
+  } catch (e) { toast('加载失败：' + e.message, false); }
+}
+function statusTag(s) {
+  const cls = s === 'success' ? 'ok' : (s === 'content_blocked' ? 'warn' : 'err');
+  return `<span class="tag ${cls}">${esc(s)}</span>`;
+}
+function table(headers, rows) {
+  if (!rows.length) return '<div class="msg">（空）</div>';
+  return `<table><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>` +
+    rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('') + '</table>';
+}
+
+/* ---------- API Keys ---------- */
+async function loadKeys() {
+  const d = await api('/api/keys');
+  $('keys-table').innerHTML = table(['名称', '前缀', '额度', '已用', '创建时间', '最近使用', '签名', '操作'],
+    d.keys.map(k => [esc(k.name), `<code>${esc(k.prefix)}…</code>`, k.quota_usd ?? '∞', k.spent_usd.toFixed(4),
+      fmtTime(k.created_at), fmtTime(k.last_used_at), k.requires_signing ? '是' : '否',
+      `<button class="ghost" onclick="rotateKey('${k.id}')">轮换</button> <button class="danger" onclick="revokeKey('${k.id}')">撤销</button>`]));
+}
+async function createKey() {
+  const ip = $('k-ip').value.trim(), models = $('k-models').value.trim();
+  const body = { name: $('k-name').value || 'default', requiresSigning: $('k-sign').checked };
+  if ($('k-quota').value) body.quotaUsd = parseFloat($('k-quota').value);
+  if (ip) body.ipWhitelist = ip.split(',').map(s => s.trim()).filter(Boolean);
+  if (models) body.modelWhitelist = models.split(',').map(s => s.trim()).filter(Boolean);
+  const r = await api('/api/keys', 'POST', body);
+  $('k-once').innerHTML = `<div class="key-once">⚠️ 仅此一次展示，请立即保存：<br>${esc(r.key)}</div>`;
+  toast('Key 已创建'); loadKeys();
+}
+async function revokeKey(id) { if (!confirm('确认撤销该 Key？不可恢复。')) return; await api('/api/keys/actions', 'POST', { action: 'revoke', keyId: id }); toast('已撤销'); loadKeys(); }
+async function rotateKey(id) { const r = await api('/api/keys/actions', 'POST', { action: 'rotate', keyId: id }); $('k-once').innerHTML = `<div class="key-once">新 Key（仅此一次展示）：<br>${esc(r.created.key)}</div>`; toast('已轮换'); loadKeys(); }
+
+/* ---------- 供应商 ---------- */
+async function loadProviders() {
+  const d = await api('/api/admin/actions', 'POST', { action: 'list_providers' });
+  $('providers-table').innerHTML = table(['ID', '名称', 'Slug', 'Base URL', '授权编号', 'Key 数', '状态'],
+    d.providers.map(p => [`<code>${esc(p.id)}</code>`, esc(p.name), esc(p.slug), `<code>${esc(p.base_url)}</code>`,
+      p.authorization_ref ? `<code>${esc(p.authorization_ref)}</code>` : '<span class="tag err">未登记</span>', p.key_count, statusTag(p.status)]));
+}
+async function upsertProvider() {
+  const payload = { name: $('pv-name').value, slug: $('pv-slug').value, baseUrl: $('pv-url').value, authorizationRef: $('pv-authref').value };
+  if ($('pv-id').value.trim()) payload.id = $('pv-id').value.trim();
+  if ($('pv-authexp').value) payload.authorizationExpiresAt = parseInt($('pv-authexp').value, 10);
+  await api('/api/admin/actions', 'POST', { action: 'upsert_provider', payload });
+  toast('供应商已保存'); loadProviders();
+}
+async function upsertProviderKey() {
+  const key = $('pk-key').value;
+  if (!key || !$('pk-pid').value.trim()) return toast('请填写供应商 ID 与密钥', false);
+  const r = await api('/api/admin/actions', 'POST', { action: 'upsert_provider_key', payload: { providerId: $('pk-pid').value.trim(), key, label: $('pk-label').value || 'prod' } });
+  $('pk-key').value = '';
+  toast('密钥已加密入库，指纹 ' + (r.result?.fingerprint || ''));
+  loadProviders();
+}
+async function adminAction(action, payload, outId) {
+  try {
+    const r = await api('/api/admin/actions', 'POST', { action, payload });
+    if (outId) $(outId).textContent = JSON.stringify(r, null, 2);
+    return r;
+  } catch (e) { toast(action + ' 失败：' + e.message, false); }
+}
+
+/* ---------- 模型与定价 ---------- */
+async function upsertModel() {
+  const payload = { publicName: $('m-public').value, providerId: $('m-provider').value, upstreamModel: $('m-upstream').value,
+    priority: parseInt($('m-priority').value, 10) || 10, costWeight: parseFloat($('m-cost').value) || 1 };
+  await api('/api/admin/actions', 'POST', { action: 'upsert_model', payload });
+  toast('模型映射已保存');
+}
+async function setPricing() {
+  const payload = { publicName: $('pr-public').value, inputPerMillion: parseFloat($('pr-in').value), outputPerMillion: parseFloat($('pr-out').value), currency: $('pr-cur').value || 'CNY' };
+  await api('/api/admin/actions', 'POST', { action: 'set_pricing', payload });
+  toast('定价已保存');
+}
+async function topup() {
+  await api('/api/admin/actions', 'POST', { action: 'topup', payload: { scope: $('tp-scope').value, amount: parseFloat($('tp-amount').value), memo: $('tp-memo').value } });
+  toast('余额已调整');
+}
+
+/* ---------- 用户 ---------- */
+async function loadUsers() {
+  const d = await api('/api/admin/actions', 'POST', { action: 'list_users' });
+  $('users-table').innerHTML = table(['ID', '邮箱', '角色', '状态', '创建时间'],
+    d.users.map(u => [`<code>${esc(u.id.slice(0, 8))}…</code>`, esc(u.email), esc(u.role), statusTag(u.status), fmtTime(u.created_at)]));
+}
+const uid = () => $('u-id').value.trim();
+async function setRole() { await adminAction('set_role', { userId: uid(), role: 'admin' }); toast('角色已更新'); loadUsers(); }
+async function banUser() { if (!confirm('确认封禁该用户？')) return; await adminAction('ban_user', { userId: uid() }); toast('已封禁'); loadUsers(); }
+async function unbanUser() { await adminAction('unban_user', { userId: uid() }); toast('已解封'); loadUsers(); }
+
+/* ---------- 内容审核 ---------- */
+async function loadFlags() {
+  const d = await api('/api/admin/actions', 'POST', { action: 'flags_queue' });
+  $('flags-table').innerHTML = table(['ID', '用户', '模型', '规则', '摘要', '时间'],
+    d.flags.map(f => [`<code>${esc(f.id.slice(0, 8))}…</code>`, `<code>${esc((f.user_id || '').slice(0, 8))}…</code>`, esc(f.public_model), esc(f.rule),
+      `<code>${esc((f.excerpt_hash || '').slice(0, 16))}…</code>`, fmtTime(f.created_at)]));
+}
+async function resolveFlag() {
+  await api('/api/admin/actions', 'POST', { action: 'resolve_flag', payload: { flagId: $('f-id').value.trim(), decision: $('f-decision').value, note: $('f-note').value } });
+  toast('已处理'); loadFlags();
+}
+
+/* ---------- 申诉 ---------- */
+async function loadAppeals() {
+  const d = await api('/api/admin/actions', 'POST', { action: 'appeals_list' });
+  $('appeals-table').innerHTML = table(['ID', '用户', '类型', '理由', '时间'],
+    d.appeals.map(a => [`<code>${esc(a.id.slice(0, 8))}…</code>`, `<code>${esc(a.user_id.slice(0, 8))}…</code>`, esc(a.target_type), esc(a.reason.slice(0, 80)), fmtTime(a.created_at)]));
+}
+async function resolveAppeal() {
+  await api('/api/admin/actions', 'POST', { action: 'resolve_appeal', payload: { appealId: $('a-id').value.trim(), decision: $('a-decision').value, note: $('a-note').value } });
+  toast('已处理'); loadAppeals();
+}
+
+/* ---------- 合规开关 ---------- */
+let settingsData = {};
+async function loadSettings() {
+  const d = await api('/api/admin/actions', 'POST', { action: 'get_settings' });
+  settingsData = d.settings;
+  const bools = [['signupsEnabled', '开放注册'], ['requireTosAcceptance', '注册强制确认条款/隐私'], ['contentModerationEnabled', '内容安全审核'], ['logContentEnabled', '记录脱敏内容片段（默认关）']];
+  const texts = [['privacyPolicyUrl', '隐私政策 URL'], ['termsOfServiceUrl', '服务条款 URL'], ['MODERATION_API_URL', '外部审核 API（可选）']];
+  const nums = [['defaultRpm', '默认 RPM'], ['defaultTpm', '默认 TPM'], ['auditLogRetentionDays', '审计保留天数']];
+  $('settings-form').innerHTML =
+    bools.map(([k, l]) => `<div class="row" style="margin-bottom:6px"><label style="font-size:13px"><input type="checkbox" data-k="${k}" ${settingsData[k] ? 'checked' : ''}> ${l}</label></div>`).join('') +
+    nums.map(([k, l]) => `<div class="row" style="margin-bottom:6px"><div class="field"><label>${l}</label><input type="number" data-k="${k}" value="${esc(settingsData[k] ?? '')}"></div></div>`).join('') +
+    texts.map(([k, l]) => `<div class="row" style="margin-bottom:6px"><div class="field"><label>${l}</label><input data-k="${k}" value="${esc(settingsData[k] ?? '')}" style="min-width:320px"></div></div>`).join('');
+}
+async function saveSettings() {
+  const patch = {};
+  document.querySelectorAll('#settings-form [data-k]').forEach(el => {
+    const k = el.dataset.k;
+    if (el.type === 'checkbox') patch[k] = el.checked;
+    else if (el.type === 'number') patch[k] = parseFloat(el.value) || 0;
+    else patch[k] = el.value;
+  });
+  await api('/api/admin/actions', 'POST', { action: 'set_settings', payload: patch });
+  toast('合规开关已保存');
+}
+
+/* ---------- 审计 ---------- */
+async function loadAudit() {
+  try {
+    const r = await fetch('/api/admin/actions', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'list_audit', payload: { limit: 200 } }) });
+    if (!r.ok) throw new Error('list_audit 需要在服务端支持（当前版本请用哈希链校验）');
+  } catch (e) {
+    $('audit-out').textContent = '提示：MVP 未提供审计列表查询接口（避免敏感聚合），可用下方"校验链完整性"验证防篡改。' + e.message;
+  }
+}
+
+/* ---------- 账单 ---------- */
+async function loadLedger() {
+  const limit = $('bl-limit').value || 50;
+  const d = await api('/api/billing/ledger?limit=' + limit);
+  $('ledger-table').innerHTML = table(['类型', '金额', '余额', '备注', '时间'],
+    d.entries.map(e => [statusTag(e.type), e.amount.toFixed(6), e.balance_after.toFixed(6), esc(e.memo || ''), fmtTime(e.created_at)]));
+}
+
+/* ---------- 启动 ---------- */
+api('/api/auth/me').then(enterApp).catch(() => { /* 未登录，显示登录页 */ });
+</script>
+</body>
+</html>

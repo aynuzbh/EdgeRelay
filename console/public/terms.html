@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>服务条款 — EdgeRelay</title>
+<style>
+  .logo-img{width:36px;height:36px;border-radius:10px;object-fit:contain}
+  .meta span{display:inline}
+  @media (max-width:640px){.meta span{display:block;line-height:1.7}}
+  :root{--bg:#F7F8FA;--card:#fff;--line:#E2E5EA;--ink:#1F2430;--muted:#6B7280;--brand:#F38020}
+  @media (prefers-color-scheme:dark){:root{--bg:#0F1219;--card:#171A23;--line:#2E3340;--ink:#E2E5EC;--muted:#8A8F9C}}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.8 Inter,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  .page{max-width:800px;margin:0 auto;padding:48px 24px 80px}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:32px}
+  .logo{width:36px;height:36px;border-radius:10px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+  h1{font-size:24px;margin-bottom:6px}
+  .meta{color:var(--muted);font-size:13px;margin-bottom:32px}
+  h2{font-size:17px;margin:28px 0 10px;padding-top:18px;border-top:1px solid var(--line)}
+  p,li{font-size:14px;color:var(--ink)}
+  ul{padding-left:22px;margin:8px 0}
+  .note{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:16px 0}
+  .muted{color:var(--muted)}
+  a{color:var(--brand)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="brand"><img src="/logo.png" alt="EdgeRelay" class="logo-img"><strong>EdgeRelay</strong></div>
+  <h1>服务条款</h1>
+  <p class="meta"><span>生效日期：2026 年 10 月 17 日</span><span>最近更新：2026 年 10 月 17 日</span></p>
+
+  <p>欢迎使用 EdgeRelay（下称"本平台"）。本平台是一个面向开发者的 <strong>API 聚合与分发服务</strong>，将多家持有合法授权的上游大模型供应商的接口统一为 OpenAI 兼容接口。请在注册或使用前仔细阅读本条款；勾选确认或实际使用即表示你已同意本条款。</p>
+
+  <h2>一、服务说明</h2>
+  <ul>
+    <li>本平台提供统一域名的对话补全接口（<code>/v1/chat/completions</code>、<code>/v1/models</code>）、API Key 管理、计量计费、用量查询等服务。</li>
+    <li>本平台仅转发你发起的请求至你所选模型的对应上游供应商，<strong>不修改、不存储对话内容的完整明文</strong>（默认仅记录元数据）。</li>
+    <li>模型名称为平台统一命名，实际由对应的真实上游模型提供服务；平台不伪造模型标识，模型与上游的对应关系可经审计追溯。</li>
+  </ul>
+
+  <h2>二、账号与安全</h2>
+  <ul>
+    <li>你须提供真实有效的邮箱用于注册，并对账号下的全部活动负责。</li>
+    <li>API Key 是你调用服务的唯一凭证，请妥善保管；平台仅存储其哈希值，无法为你找回明文，泄露或遗失时应立即轮换或撤销。</li>
+    <li>发现账号被盗用请立即联系我们，平台可对账号采取冻结等保护措施。</li>
+  </ul>
+
+  <h2>三、合规使用（重要）</h2>
+  <div class="note">
+    <p>你承诺<strong>不</strong>利用本平台从事以下行为：</p>
+    <ul>
+      <li>生成、传播违反法律法规、危害国家安全、侵犯他人合法权益的内容；</li>
+      <li>生成或传播侵犯未成年人权益、色情、暴力、歧视、诽谤等违法信息；</li>
+      <li>逆向、拆分、转售平台服务以规避计费（未经书面许可不得对第三方转提供本平台服务）；</li>
+      <li>绕过或攻击平台限流、鉴权、签名校验等安全机制；</li>
+      <li>将服务用于任何上游供应商许可协议或适用法律禁止的用途。</li>
+    </ul>
+  </div>
+  <p>平台内置内容安全审核机制。触发安全策略的请求会被拦截并进入人工复核；对拦截结果有异议的，可通过申诉渠道提交复核。违规使用可能导致警告、限流、封禁；情节严重的，平台将依法留存证据并配合监管部门处理。</p>
+
+  <h2>四、计费与额度</h2>
+  <ul>
+    <li>按模型的输入/输出 Token 用量分别计价，价格以平台公示为准；调用前平台会预冻结预估额度，完成后按实际用量结算。</li>
+    <li>余额不足时接口将返回 402/429 状态码；充值与消费明细可在控制台账单页查询并导出。</li>
+    <li>平台可能因上游价格调整而更新定价，调整前将在控制台公告。</li>
+  </ul>
+
+  <h2>五、服务可用性与免责</h2>
+  <ul>
+    <li>平台按"现状"提供服务，虽设计了多上游故障转移，但不保证服务不中断或完全无错误。</li>
+    <li>对因不可抗力、上游供应商故障、你自身的密钥泄露或违规使用造成的损失，平台在法律允许范围内不承担责任。</li>
+    <li>你对使用模型输出内容作出的决策自行负责；模型生成内容不构成专业建议。</li>
+  </ul>
+
+  <h2>六、条款变更与终止</h2>
+  <p>平台可在控制台公告条款修订；继续使用即视为接受修订版本。你可随时停止使用并导出自己的数据；平台也可在你严重违规时中止服务并按第七条处理你的数据。</p>
+
+  <h2>七、法律适用与联系</h2>
+  <p>本条款适用中华人民共和国法律。因本条款产生的争议，双方应友好协商解决。平台的隐私处理见<a href="/privacy.html">《隐私政策》</a>。</p>
+  <p class="muted">联系方式：mail@collegehub.cn</p>
+</div>
+</body>
+</html>

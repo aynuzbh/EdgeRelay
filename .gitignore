@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.vite/
+.void/
+.env
+.dev.vars
+wrangler.jsonc
+wrangler.json
+void.lock.json
+shots/
+.void-wrangler.jsonc
+*.log
+.env*

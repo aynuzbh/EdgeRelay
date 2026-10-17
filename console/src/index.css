@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- 设计令牌：浅色 / 深色（Cloudflare Dashboard 风格） ---------- */
+:root {
+  --c-bg: 247 248 250;        /* #F7F8FA 页面背景 */
+  --c-surface: 255 255 255;   /* 卡片 */
+  --c-surface2: 244 245 247;  /* 次级面板/悬停 */
+  --c-line: 226 229 234;      /* 边框 */
+  --c-ink: 31 36 48;          /* 主文字 */
+  --c-muted: 107 114 128;     /* 次级文字 */
+  --c-brand-soft: 243 128 32; /* 品牌柔色背景 */
+  --c-sidebar: 255 255 255;
+  --c-sidebar-ink: 75 85 99;
+}
+[data-theme="dark"] {
+  --c-bg: 15 18 25;           /* #0F1219 */
+  --c-surface: 23 26 35;      /* #171A23 */
+  --c-surface2: 32 36 47;
+  --c-line: 46 51 64;
+  --c-ink: 226 229 236;
+  --c-muted: 138 143 156;
+  --c-sidebar: 15 23 42;      /* #0F172A */
+  --c-sidebar-ink: 148 163 184;
+}
+
+html { font-family: Inter, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+body { @apply bg-bg text-ink antialiased; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { @apply bg-line rounded-full border-2 border-solid border-transparent bg-clip-padding; }
+::-webkit-scrollbar-track { background: transparent; }
+
+@keyframes toast-in { from { transform: translateX(16px); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes pop-in { from { transform: translateY(8px) scale(.98); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes shimmer { 0% { background-position: -400px 0 } 100% { background-position: 400px 0 } }
+
+.anim-toast { animation: toast-in .22s ease-out }
+.anim-fade { animation: fade-in .15s ease-out }
+.anim-pop { animation: pop-in .18s ease-out }
+.skeleton { @apply rounded-md bg-surface2; background-image: linear-gradient(90deg, transparent, rgb(var(--c-line) / .6), transparent); background-size: 400px 100%; animation: shimmer 1.4s infinite; }

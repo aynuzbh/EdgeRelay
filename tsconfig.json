@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "lib": ["ES2022"],
+    "types": ["void/env", "@cloudflare/workers-types"]
+  },
+  "include": ["src", "routes", "db", "env.ts", "void.config.ts", "vite.config.ts"]
+}

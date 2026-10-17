@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>隐私政策 — EdgeRelay</title>
+<style>
+  .logo-img{width:36px;height:36px;border-radius:10px;object-fit:contain}
+  .meta span{display:inline}
+  @media (max-width:640px){.meta span{display:block;line-height:1.7}}
+  :root{--bg:#F7F8FA;--card:#fff;--line:#E2E5EA;--ink:#1F2430;--muted:#6B7280;--brand:#F38020}
+  @media (prefers-color-scheme:dark){:root{--bg:#0F1219;--card:#171A23;--line:#2E3340;--ink:#E2E5EC;--muted:#8A8F9C}}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.8 Inter,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  .page{max-width:800px;margin:0 auto;padding:48px 24px 80px}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:32px}
+  .logo{width:36px;height:36px;border-radius:10px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+  h1{font-size:24px;margin-bottom:6px}
+  .meta{color:var(--muted);font-size:13px;margin-bottom:32px}
+  h2{font-size:17px;margin:28px 0 10px;padding-top:18px;border-top:1px solid var(--line)}
+  p,li{font-size:14px}
+  ul,table{margin:8px 0}
+  ul{padding-left:22px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border:1px solid var(--line)}
+  th{background:var(--card);color:var(--muted);font-weight:500}
+  .note{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:16px 0}
+  .muted{color:var(--muted)}
+  a{color:var(--brand)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="brand"><img src="/logo.png" alt="EdgeRelay" class="logo-img"><strong>EdgeRelay</strong></div>
+  <h1>隐私政策</h1>
+  <p class="meta"><span>生效日期：2026 年 10 月 17 日</span><span>最近更新：2026 年 10 月 17 日</span></p>
+
+  <p>EdgeRelay（下称"本平台"）深知个人信息对你的重要性。本政策说明我们收集哪些信息、如何使用与保护，以及你享有的权利。注册或使用本平台即表示你已阅读并同意本政策。</p>
+
+  <h2>一、我们收集的信息</h2>
+  <table>
+    <tr><th>类别</th><th>内容</th><th>用途</th><th>保留期限</th></tr>
+    <tr><td>账号信息</td><td>邮箱、密码哈希（PBKDF2，不存明文）</td><td>注册登录、身份识别</td><td>账号存续期间</td></tr>
+    <tr><td>会话信息</td><td>会话 Cookie（HttpOnly）、登录 IP、User-Agent</td><td>维持登录、安全审计</td><td>会话有效期 7 天</td></tr>
+    <tr><td>请求元数据</td><td>时间、模型、状态码、耗时、Token 数、来源 IP、API Key 标识</td><td>计量计费、限流、故障排查</td><td>账单与审计所需期限（审计日志 ≥180 天）</td></tr>
+    <tr><td>计费数据</td><td>余额、冻结额度、充值与扣费流水</td><td>计费对账、账单导出</td><td>法定期限</td></tr>
+    <tr><td>内容安全数据</td><td>被拦截请求的 SHA-256 摘要与脱敏片段（默认不存原文）</td><td>人工复核、违规处置</td><td>复核完成后按需保留</td></tr>
+  </table>
+
+  <div class="note">
+    <p><strong>关于对话内容（Prompt 与模型回复）：</strong>本平台默认<strong>不记录</strong>任何对话内容的完整明文。请求在内存中完成鉴权、审核钩子与转发后即释放；仅当你主动开启"记录脱敏内容片段"实验功能时，才会存储经过脱敏处理的有限片段。上游供应商按其自身隐私政策处理推理请求，其名称与授权信息见平台供应商页。</p>
+  </div>
+
+  <h2>二、我们如何使用信息</h2>
+  <ul>
+    <li>提供核心服务：鉴权、路由转发、计量计费、限流；</li>
+    <li>保障安全：防重放签名校验、异常检测、封禁与申诉处理；</li>
+    <li>满足合规义务：内容安全审核、审计日志（哈希链防篡改，保留不少于 180 天）；</li>
+    <li>改进服务：聚合统计（如近 24 小时请求量、错误率），不涉及个人内容。</li>
+  </ul>
+  <p>我们不会将你的个人信息用于个性化广告，也不会向无关第三方出售。</p>
+
+  <h2>三、共享与存储</h2>
+  <ul>
+    <li><strong>上游供应商：</strong>为完成推理，你的对话请求（含必要内容）会传输给你所调用模型对应的供应商；其处理行为受该供应商隐私政策约束。</li>
+    <li><strong>基础设施：</strong>数据存储于 Cloudflare Workers 生态（D1 数据库、KV、R2 对象存储），可能在中国大陆以外的边缘节点传输与缓存。</li>
+    <li><strong>依法披露：</strong>仅在法律法规要求或监管部门依法要求时提供。</li>
+  </ul>
+
+  <h2>四、你的权利</h2>
+  <ul>
+    <li><strong>查询与导出：</strong>控制台可随时查询余额、账单流水并导出 CSV；</li>
+    <li><strong>更正与删除：</strong>可修改账号资料；注销账号后，我们将在合理期限内删除或匿名化你的个人信息（法律要求留存的除外）；</li>
+    <li><strong>撤回同意：</strong>关闭相应功能（如内容片段记录）即可撤回对应授权；</li>
+    <li><strong>申诉：</strong>对封禁、Key 撤销或内容拦截有异议的，可通过控制台申诉通道提交，我们将在承诺时限内复核答复。</li>
+  </ul>
+
+  <h2>五、安全措施</h2>
+  <ul>
+    <li>上游供应商密钥以 AES-256-GCM 加密存储；平台 API Key 仅存 SHA-256 哈希；</li>
+    <li>传输全程 TLS 加密；管理接口强制二次验证；</li>
+    <li>审计日志采用哈希链防篡改并支持完整性校验。</li>
+  </ul>
+
+  <h2>六、未成年人保护与政策更新</h2>
+  <p>本平台面向开发者与企业用户，不面向未满 14 周岁的未成年人；如发现未成年人在未取得监护人同意的情况下注册，我们将删除其信息。政策如有重大变更，将在控制台公告并更新"最近更新"日期。</p>
+
+  <h2>七、联系我们</h2>
+  <p class="muted">隐私事务联系：mail@collegehub.cn · 相关条款见<a href="/terms.html">《服务条款》</a></p>
+</div>
+</body>
+</html>

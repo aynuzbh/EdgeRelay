@@ -1,0 +1,24 @@
+{
+  "name": "ai-gateway-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "合规的 AI API 中转/聚合网关 MVP (Cloudflare Workers + Void SDK + D1 + KV + AI Gateway)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "db:generate": "void db generate",
+    "deploy": "void deploy"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.0",
+    "void": "^1.1.11"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251001.0",
+    "drizzle-kit": "^0.31.11",
+    "typescript": "^5.6.0",
+    "vite": "^8.0.0",
+    "wrangler": "^4.151.1"
+  }
+}
